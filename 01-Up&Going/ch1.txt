@@ -1,1 +1,40 @@
 Chapter 1: Into Programming
+
+Statements: a group of words, number and operators that perform a specific task
+
+Expressions: any reference to a variable or a value, or a set of variables and
+             values combined with operators
+
+Interpreting code: translation of commands done from top to bottom, line by line
+                   every time the program is run
+                   
+Compiling code: translation is done ahead of time, when the program runs later,
+                what's running is actually already compiled
+                
+Primitive types: number, string and boolean
+
+Coercion: covert between different types
+
+Implicit coercion: convert a type to another without explicitly using a wrapper
+
+Loose equal (==): when comparing with loose equal operators, same value in two
+                  different representations, two different types are equivalent
+                  
+Code comments: -too many comments is probably a sign of poorly written code
+               -comments should explain why, not what, optionally explain how
+               
+Static typing: declare a variable to hold a specific type of value
+
+Dynamic typing: allows variables to hold any type of value at any time
+               
+var amount = 99.99;
+amount = amount * 2;
+console.log( amount );		// 199.98, implicitly coerced number to string for printing
+
+-toFixed(..) is a function that can be accessed on number values for number of
+             decimal values
+        
+-ES6 uses const to declare constants instead of var
+
+-In JS, values such as 0, "", false, null, undefined and NaN are considered false
+
