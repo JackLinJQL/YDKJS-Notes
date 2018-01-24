@@ -70,3 +70,106 @@ comparison occurs
 
 NaN is neither greater-than nor less-than any other value
 
+Hoisting: where a var appear inside a scope that declaration is taken to belong 
+          belong to the entire scope and accessible everywhere throughout
+          
+E.g. 
+  var a = 2;
+
+  foo();					// works because `foo()`
+            // declaration is "hoisted"
+
+  function foo() {
+    a = 3;
+
+    console.log( a );	// 3
+
+    var a;				// declaration is "hoisted"
+              // to the top of `foo()`
+              // a in this case has a local scope to the function foo
+  }
+
+  console.log( a );	// 2
+
+-if accessing a variable in a scope that's not available, ReferenceError gets
+ produced
+  
+E.g.
+  function foo() {
+  	a = 1;	// `a` not formally declared
+  }
+  
+  foo();
+  a;			// 1 -- oops, auto global variable :(
+  
+-let allows block scoping unlike var which defines a variable globally or locally 
+ to an entire function regardless of block scope
+ 
+-for switch/case statements, if break is omitted, execution is continued
+  E.g.
+    switch (a) {
+    case 2:
+    case 10: //acting as if(a === 2 || a === 10)
+      // some cool stuff
+      break;
+    case 42:
+      // other stuff
+      break;
+    default:
+      // fallback
+    }
+  
+Strict mode: tightens the rules for certain behaviors to keep the code more 
+             optimizable by the engine
+  -can be used for individual function or an entire file depending on where it's
+   declared
+   
+Function as values: not only can one pass a value to a function, but a function
+  can itself can be a value that's assigned to variables or passed to or returned
+  from other functions
+  
+E.g.
+  var foo = function() { //anonymous function
+  	// ..
+  };
+
+  var x = function bar(){
+  	// ..
+  };
+
+Immediately invoked function expressions:
+  (function IIFE() {})();
+    
+  -using an IIFE is often used to declare variables that won't affect the
+   surrounding code outside of IIFE since it has a variable scope
+   
+Closure:
+  E.g.
+    function makeAdder(x) {
+      // parameter `x` is an inner variable
+
+      // inner function `add()` uses `x`, so
+      // it has a "closure" over it
+      function add(y) {
+        return y + x;
+      };
+
+      return add;
+    }
+    
+    // `plusOne` gets a reference to the inner `add(..)`
+    // function with closure over the `x` parameter of
+    // the outer `makeAdder(..)`
+    var plusOne = makeAdder( 1 );
+
+    // `plusTen` gets a reference to the inner `add(..)`
+    // function with closure over the `x` parameter of
+    // the outer `makeAdder(..)`
+    var plusTen = makeAdder( 10 );
+
+    plusOne( 3 );		// 4  <-- 1 + 3
+    plusOne( 41 );		// 42 <-- 1 + 41
+
+    plusTen( 13 );		// 23 <-- 10 + 13
+    
+  
