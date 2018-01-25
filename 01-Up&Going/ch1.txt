@@ -37,4 +37,3 @@ console.log( amount );		// 199.98, implicitly coerced number to string for print
 -ES6 uses const to declare constants instead of var
 
 -In JS, values such as 0, "", false, null, undefined and NaN are considered false
-

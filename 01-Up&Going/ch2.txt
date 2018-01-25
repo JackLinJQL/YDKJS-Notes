@@ -172,4 +172,108 @@ Closure:
 
     plusTen( 13 );		// 23 <-- 10 + 13
     
+The most common usage of closure in JS is the module pattern where it lets one
+define private implementation details (variables, functions) that are hidden from
+the outside world
+E.g.
+  function User(){
+  	var username, password;
+
+  	function doLogin(user,pw) {
+  		username = user;
+  		password = pw;
+
+  		// do the rest of the login work
+  	}
+
+  	var publicAPI = {
+  		login: doLogin
+  	};
+
+  	return publicAPI;
+  }
+
+  // create a `User` module instance
+  var fred = User();
+
+  fred.login( "fred", "12Battery34!" );
   
+'this' reference usually points to an object, but which it points to depends on
+how the function was called
+
+E.g.
+  function foo() {
+  	console.log( this.bar ); //this is the "global" object
+  }
+
+  var bar = "global";
+
+  var obj1 = {
+  	bar: "obj1",
+  	foo: foo
+  };
+
+  var obj2 = {
+  	bar: "obj2"
+  };
+
+  // --------
+
+  foo();				// "global"
+  obj1.foo();			// "obj1"
+  foo.call( obj2 );		// "obj2"
+  new foo();			// undefined
+  
+Prototypes: when referencing a property on an object, if that property doesn't
+            exist, JS will auto use that object's internal prototype reference
+            to find another object to look for the property on
+            
+  E.g.
+    var foo = {
+      a: 42
+    };
+
+    // create `bar` and link it to `foo`
+    var bar = Object.create( foo );
+
+    bar.b = "hello world";
+
+    bar.b;		// "hello world"
+    bar.a;		// 42 <-- delegated to `foo`
+
+  -this can be used to emulate/fake a "class" mechanism with "inheritance"
+  -a more natural way of applying prototypes is a pattern called "behavior delegation"
+   where one intentionally link objects to delegate from one to the other
+   
+Polyfill: taking the definition of newer feature and producing a piece of code 
+          that's equivalent to the behavior, but is able to run in older JS envs
+  E.g. Number.isNaN() provides an accurate non-buggy check for NaN values
+  if (!Number.isNaN) { //check if isNaN is an existing implementation 
+    Number.isNaN = function isNaN(x) {
+      return x !== x; //only NaN value doesn't equal to itself
+    };
+  }
+      
+Transpiling: convert newer code to older code equivalents
+  -new syntax added is designed to make code more readable and maintainable
+  -if transpile only to older browsers, one gets to take advantage of browsers
+   performance optimization
+  
+Default parameter values:
+  function foo(a = 2) {
+    console.log( a );
+  }
+
+  foo();		// 2
+  foo( 42 );	// 42
+  
+Note: void 0 === undefined //true
+
+The 'document' variable exists as a global variable when your code is running
+in a browser, not provided by the JS engine, nor is it particularly controlled
+by JS spec, it's a special object known as the 'host object'
+
+Methods of the 'document' object are provided by the DOM from browser
+
+Functions like alert(..) and console.log(..) are mechanisms provided by the
+browser internals, not the JS engine itself
