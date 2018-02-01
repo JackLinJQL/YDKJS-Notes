@@ -2,3 +2,27 @@ Chapter 1: What is Scope?
 -variables is what gives a program state.
 
 Compiler Theory:
+Traditional compiled language process:
+  -Tokenizing/Lexing: breaking up a string of characters into meaningful chunks,
+   called tokens
+    E.g. var a = 2;  --->  var,a,=,2,;
+    -difference between tokenizing/lexing centers on whether or not these tokens
+     are identified in a stateless or stateful way
+     E.g. if the tokenizer were to invoke stateful parsing rules to figure out
+      whether 'a' should be considered a distinct token or part of another, that
+      would be lexing
+
+  -Parsing: takes a stream of tokens and turning it into a tree of nested elements
+   called an Abstract Syntax Tree (AST)
+   E.g. Tree for var a = 2; might start with top-level node called VariableDeclaration
+    with a child node called Identifier and another child called AssignmentExpression
+    which itself has a child called NumericLiteral
+
+  -Code Generation: process of taking an AST and turning it into executable code
+    -takes AST and turn it into a set of machine instructions to actually create
+     a variable called a
+
+  -JS engines don't get the luxury of having plenty of time to optimize since JS
+   compilation doesn't happen in a build step ahead of time
+
+  
