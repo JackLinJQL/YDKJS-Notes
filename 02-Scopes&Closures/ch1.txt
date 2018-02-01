@@ -1,0 +1,4 @@
+Chapter 1: What is Scope?
+-variables is what gives a program state.
+
+Compiler Theory:
