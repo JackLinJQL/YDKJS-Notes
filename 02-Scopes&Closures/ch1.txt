@@ -25,4 +25,28 @@ Traditional compiled language process:
   -JS engines don't get the luxury of having plenty of time to optimize since JS
    compilation doesn't happen in a build step ahead of time
 
-  
+Understanding Scope:
+-Engine: responsible for start-to-finish compilation and execution of a JS program
+-Compiler: handle parsing and code-generation
+-Scope: collects and maintains a loop-op list of all the declared identifiers (vars),
+ and enforces a strict set of rules as to how these are accessible to currently
+ executing code
+
+To approach var a = 2:
+  -compiler will first perform lexing to break it down into tokens, which then
+   parses into a tree
+  -encounter var a, asks scope to see if var a already exists for that particular
+   scope collection, if so, ignore this declaration and move on, else asks scope
+   to declare a new var called a for that scope collection
+  -compiler will now produce code for engine to later execute, to handle a = 2,
+   code engine runs will first ask if there is a var a in the current scope collection,
+   if so, use that var, else look elsewhere
+  -if var is never found, raise an error
+
+LHS look-up: done when a variable appears on the left-hand side of an assignment
+  operation, and RHS look-up is done when a variable appears on the right-hand side
+  of an assignment operation
+  E.g. a = 2; <- doesn't matter what a currently is, simply find the variable as
+    target for = 2 assignment operation
+
+-RHS look-up can be thought as retrieve his/her source (value), implying go get the value of
