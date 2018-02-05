@@ -1,0 +1,15 @@
+Chapter 2: Lexical Scope
+
+Lex-time:
+-lexing aka tokenizing, examines a string of source code characters and assigns
+ semantic meanings to the token as a result of some stateful parsing
+-lexical scope is scope that is defined at lexing time, which is based on where
+ variables and blocks of scope are authored, by you, at write time and set in
+ stone by the time the lexer processed your code
+
+Look-ups:
+-scope look-up stops once it find the first match, the same identifier name can
+ be specified at multiple layers of nested scope, known as shadowing (inner shadows
+ the outer identifier)
+-global variables are also automatically properties of the global object (window
+ in browsers)
