@@ -13,3 +13,24 @@ Look-ups:
  the outer identifier)
 -global variables are also automatically properties of the global object (window
  in browsers)
+-global variables are automatically properties of the global object, therefore it
+ is possible to reference a global variable with "window.a" instead of "a"
+-lexical scope look-up process only applies to first-class identifiers and if accessing
+ in the form "foo.bar.baz", object property-access rules are used to resolve bar and
+ baz
+
+Cheating Lexical:
+-cheat lexical scope leads to poorer performance
+ eval(): takes a string as arg, treats the content of the string as if it had actually
+ been authored code at that point in the program, so one can programmatically
+ generate code inside of your authored code and run the generated code as if it had
+ been there at author time
+-After eval(..), Engine will not "know" or "care" that the previous code was
+ dynamically interpreted
+-eval(..) when used in strict-mode operates in its own lexical scope which does
+ not actually modify the enclosing scope
+-setTimeout(..) and setInterval(..) can take a string for their first arg, the
+ contents of which are evaluated as the code of a dynamically generated function
+-thew "new Function(..)" function constructor similarly takes a string of code in
+ its last argument to turn into a dynamically generated function
+-function constructor syntax is faster than eval, but should still be avoided
