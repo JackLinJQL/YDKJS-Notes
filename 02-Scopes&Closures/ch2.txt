@@ -34,3 +34,67 @@ Cheating Lexical:
 -thew "new Function(..)" function constructor similarly takes a string of code in
  its last argument to turn into a dynamically generated function
 -function constructor syntax is faster than eval, but should still be avoided
+-with: short-hand for making multiple property references against an object without
+ repeating the object reference itself each time
+ E.g.
+  var obj = {
+    a: 1,
+    b: 2,
+    c: 3
+  };
+
+  // more "tedious" to repeat "obj"
+  obj.a = 2;
+  obj.b = 3;
+  obj.c = 4;
+
+  // "easier" short-hand
+  with (obj) {
+    a = 3;
+    b = 4;
+    c = 5;
+  }
+
+  E.g.:
+    function foo(obj) {
+    	with (obj) {
+    		a = 2;
+    	}
+    }
+
+    var o1 = {
+    	a: 3
+    };
+
+    var o2 = {
+    	b: 3
+    };
+
+    foo( o1 );
+    console.log( o1.a ); // 2
+
+    foo( o2 );
+    console.log( o2.a ); // undefined
+    console.log( a ); // 2 -- Oops, leaked global!
+
+-when using with(..){}, if property does not exist in the object that's passed in,
+ the property will not be created on the object, but instead, gets attached to the
+ global object
+-with statement takes an object (with one or more properties), and treats that
+ object as if it is a wholly separate lexical scope, and thus the object's properties
+ are treated as lexically defined identifiers in that "scope"
+-A normal var declaration inside a with block will not be scoped to that with block,
+ but instead the containing function scope
+-with creates a whole new lexical scope out of thin air, from the object you pass to it
+-when o1 was passed in, the o1 scope had an identifier which corresponds to o1.a,
+ but when o2 is used as the scope, it had no such identifier, so the normal rule
+ of LHS identifiers look-up occurred, resulting an auto-global being created
+-essentially, with, at run-time turns object and its properties into a scope with
+ identifiers
+-JS Engine performs lots of optimization during compilation phase, some bring able
+ to essentially statically analyze the code as it lexes and pre-determine where
+ all the variable and function declarations are, so it takes less effort to resolve
+ identifier during execution
+-optimization isn't performed on eval and with statements since it's simply cannot be
+ done at lexing time
+ 
