@@ -1,0 +1,32 @@
+Chapter 3: Function vs. Block Scope
+Scope From Functions:
+  -function scope encourages the idea that all variables belong to the function,
+   and can be used and reused throughout the entirety of the function
+
+Hiding in Plain Scope:
+  -take any arbitrary section of code and wrap a function declaration around it,
+   which hides the code
+  -practical result is to create a scope bubble around the code in question
+  -so one can "hide" variables and functions by enclosing them in the scope of a
+   function
+  -Principle of Least Privilege: in the design of software, such as the API for a
+   module/object, one should expose only what is minimally necessary and "hide"
+   everything else
+
+Collision Avoidance:
+  -results often in unexpected overwriting of values
+
+  Global "Namespaces":
+    -multiple libraries loaded into a program can quite easily collide with each
+     other if they don't properly hide their internal/private functions and vars
+    -libraries typically create a single variable declaration, often an object,
+     in the global scope and then it's used as a "namespace" for that library,
+     where specific exposures of functionality are made as properties of that
+     object
+
+  Module Management:
+    -non libraries ever add any identifiers to the global scope, but are instead
+     required to have their identifier(s) be explicitly imported
+
+Function as Scopes:
+  -
