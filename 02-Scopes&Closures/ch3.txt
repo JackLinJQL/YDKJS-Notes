@@ -29,4 +29,83 @@ Collision Avoidance:
      required to have their identifier(s) be explicitly imported
 
 Function as Scopes:
-  -
+  -while one can hide snippet of code in a function, but there are a few problems
+   it introduces, one being that a named function need to be declared, which pollutes
+   the enclosing scope, the function name has to be explicitly called to be executed
+  -would be more ideal if function didn't have a name
+  
+  E.g.
+    var a = 2;
+
+    (function foo(){ // <-- insert this
+
+      var a = 3;
+      console.log( a ); // 3
+
+    })(); // <-- and this
+
+    console.log( a ); // 2
+    
+    -wrapping function starts with (function ... as oppose to just function...,
+     the function gets treated as a function-expression rather than a declaration
+    -to distinguish between declaration and expression, the position of the word
+     function in the statement is a declaration is the very first thing in the statement
+     then it's a function, otherwise, it's a function expression
+    -key difference relates to where its name is bound as an identifier
+    -in this case, name foo is not bound in the enclosing scope, but instead is
+     bound only inside of its own function
+    -meaning that (function foo(){..}) is found only in the scope where the ..
+     indicates, not in the outer scope, which hides foo inside itself and it
+     doesn't pollute the enclosing scope
+  
+  Anonymous vs. Named
+    -anonymous function has no name identifier on it, function express can be anonymous,
+     but function declarations cannot omit the name
+    -drawbacks
+      1. anonymous function have no useful name to display in stack traces
+      2. without a name and recursion is needed, the deprecated "arguments.callee"
+         is unfortunately required, another e.g. is when an event handler function
+         wants to unbind itself after it fires
+      3. omits a name that's often helpful in providing more readable/understandable
+         code
+    -inline function expressions: powerful and useful, question of anonymous vs. 
+     named doesn't detract from that, providing a name for your function effectively
+     addressed these drawbacks, best practice is to always name your function expressions
+
+  Invoking function expressions immediately
+    -(function...)(), () on the end executes the function, aka. Immediately 
+     Invoked Function Expression (IIFE)
+    -they don't need names, but a good practice
+    -(function() { .. }()) is a valid form as well, just a stylistic choice
+    
+    E.g.
+      var a = 2;
+
+      (function IIFE( global ){
+      	var a = 3;
+      	console.log( a ); // 3
+      	console.log( global.a ); // 2
+      })( window );
+      console.log( a ); // 2
+    
+    E.g.
+      undefined = true; // setting a land-mine for other code! avoid!
+
+      (function IIFE( undefined ){
+        var a;
+        if (a === undefined) {
+          console.log( "Undefined is safe here!" );
+        }
+      })(); //there must be no parameters being passed in, then declare undefined
+    
+    E.g. Used in Universal Module Definition
+      var a = 2;
+    
+      (function IIFE( def ){
+      	def( window );
+      })(function def( global ){
+      	var a = 3;
+      	console.log( a ); // 3
+      	console.log( global.a ); // 2
+      });
+    
