@@ -109,3 +109,84 @@ Function as Scopes:
       	console.log( global.a ); // 2
       });
     
+Blocks As Scopes
+  -many languages other than JS support Block Scope
+  -variable in a block actually scopes itself to the enclosing scope (function or global)
+  -block scoping: declaring variables as close as possible, as local as possible,
+   to where they will be used
+  -however, where we declare variables don't actually matter since they will 
+   always belong to the enclosing scope
+  -with does create a form of block scope where it only exists for the lifetime
+   of that with statement, and not in the enclosing scope
+  -try/catch: ES3 specified the var declaration in the catch clause to be block scoped
+   to the catch block
+   E.g.
+   try {
+      undefined(); // illegal operation to force an exception!
+    }
+    catch (err) {
+      console.log( err ); // works!
+    }
+
+    console.log( err ); // ReferenceError: `err` not found
+
+  -if there are two or more catch clauses in the same scope, using the same variable
+   err isn't actually a re-definition, but many linters complain
+  
+  -let, attaches the variable declaration to the scope of whatever block (commonly
+   a { .. } pair) it's contained in
+   
+  E.g. 
+    var foo = true;
+
+    if (foo) {
+    let bar = foo * 2;
+    bar = something( bar );
+    console.log( bar );
+    }
+
+    console.log( bar ); // ReferenceError
+    
+  -explicit block creation can address issues with implicit block scoping, just
+   put {} around the wanted/expected variable scope
+  -declaration made with let won't hoist to the entire scope of the block they
+   appear in, such declaration won't observably "exist" in the block until the
+   declaration statement
+   E.g.
+    {
+      console.log( bar ); // ReferenceError!
+      let bar = 2;
+    }
+    
+  Garbage Collection
+    -if some variable containing lots of data and block scope is not used, it
+     does not get garbage collected
+    
+    E.g.
+      function process(data) {
+        // do something interesting
+      }
+
+      // anything declared inside this block can go away after!
+      {
+        let someReallyBigData = { .. };
+        process( someReallyBigData );
+      }
+
+      var btn = document.getElementById( "my_button" );
+
+      btn.addEventListener( "click", function click(evt){
+        console.log("button clicked");
+      }, /*capturingPhase=*/false );
+      
+  let (ES6)
+    -not only does let in a for loop bind the i to the for-loop body, but it
+     re-binds it to each iteration of the loop, making sure to re-assign it to the
+     value from the end of the previous loop iteration
+    
+  const (ES6)
+    -also creates a block-scope, but value is fixed (constant)
+    
+Principle of lease Privilege: in a particular abstraction layer of a computing
+environment, every module must be able to access only the information and resources
+that are necessary for its legitimate purpose
