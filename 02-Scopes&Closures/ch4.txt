@@ -1,0 +1,19 @@
+Chapter 4: Hoisting
+
+Chicken or the Egg?
+  E.g.
+    a = 2;
+    var a;
+    console.log( a ); //2
+  
+    console.log( a ); //undefined
+    var a = 2;
+    
+  -since engine actually compiles JS code before it interprets it, part of it
+   was to find and associate all declarations with their appropriate scope
+  -so the best way to think of it is that all declarations, both variables and 
+   functions are processed first before any part of code is executed
+  -when 'var a = 2;', JS actually thinks of it as two statements: 'var a;' and
+   'a = 2;', declaration is processed during the compilation phase, assignment
+   is left 'in place' for the execution phase
+  
