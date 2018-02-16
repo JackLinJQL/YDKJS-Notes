@@ -2,5 +2,117 @@ Chapter 5: Scope Closure
   -closure is all around you in JavaScript, you just have to recognize and embrace it
   
 Nitty Gritty
--closure is when a function is able to remember and access its lexical scope 
- even when that function is executing outside its lexical scope
+  -closure is when a function is able to remember and access its lexical scope 
+   even when that function is executing outside its lexical scope
+  E.g.
+    function foo() {
+      var a = 2;
+      function bar() {
+        console.log( a ); // 2
+      }
+      bar();
+    }
+    foo();
+    //function bar() has a closure over the scope of foo()
+  
+  E.g.
+    function foo() {
+  	  var a = 2;
+    	function bar() {
+    		console.log( a );
+    	}
+  	  return bar;
+    }
+
+    var baz = foo();
+    baz(); // 2 -- Whoa, closure was just observed, man.
+  
+  -normally, Garbage Collector frees up memory once it's no longer in use, but
+   closure doesn't let this happen, the inner scope is in fact still "in use"
+  -by virtue of where it was declared, bar() has a lexical scope closure over
+   that inner scope of foo(), which keeps that scope alive for bar() to ref at
+   any later time
+  -bar() still has a reference to that scope, and that reference is called closure
+  
+Now I Can See
+  E.g.
+  function wait(message) {
+    setTimeout( function timer(){
+      console.log( message );
+    }, 1000 );
+  }
+
+  wait( "Hello, closure!" );
+  
+  Closure
+    -whenever and wherever you treat functions (which access their own respective
+     lexical scopes) as first-class value and pass them around, you are likely
+     to see those functions exercising closure
+    -be that timers, event handlers, Ajax requests, cross-window messaging, web
+     workers, or any of the other asynchronous (or sync) tasks, when you pass in
+     a callback function, closure takes place
+    
+Loops + Closure 
+  E.g.
+  for (var i=1; i<=5; i++) {
+    setTimeout( function timer(){
+      console.log( i );
+    }, i*1000 );
+  }
+  -'6' will be printed 5 times, at the one-second intervals
+  -even if it was setTimeout(.., 0) on each iteration, all those function callbacks
+   would stil lrun strictly after the completion of the loop
+  -all 5 of those functions, though are defined separately in each loop iteration,
+   all are closed over the same shared global scope, which has in fact, only i in it
+  
+  E.g.
+    for (let i=1; i<=5; i++) {
+      setTimeout( function timer(){
+        console.log( i );
+      }, i*1000 );
+    }
+    
+  -special behavior for 'let' declarations used in the head of a for-loop where
+   the variable will be declared not just once for the loop, but each iteration
+   
+Modules
+  E.g.
+  function foo() {
+  	var something = "cool";
+  	var another = [1, 2, 3];
+
+  	function doSomething() {
+  		console.log( something );
+  	}
+
+  	function doAnother() {
+  		console.log( another.join( " ! " ) );
+  	}
+  }
+  
+  E.g.
+  function CoolModule() {
+  	var something = "cool";
+  	var another = [1, 2, 3];
+
+  	function doSomething() {
+  		console.log( something );
+  	}
+
+  	function doAnother() {
+  		console.log( another.join( " ! " ) );
+  	}
+
+  	return {
+  		doSomething: doSomething,
+  		doAnother: doAnother
+  	};
+  }
+
+  var foo = CoolModule();
+
+  foo.doSomething(); // cool
+  foo.doAnother(); // 1 ! 2 ! 3
+  
+  -module pattern, most common way of implementing the module pattern is often
+   called "Revealing Module"
