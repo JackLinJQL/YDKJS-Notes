@@ -116,3 +116,9 @@ Modules
   
   -module pattern, most common way of implementing the module pattern is often
    called "Revealing Module"
+   
+  -object returned has reference to the inner functions, but not our inner data
+   variables, those are kept hidden and private, we can think of this object return
+   value as essentially public API for our module
+  
+  
