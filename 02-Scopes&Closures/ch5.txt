@@ -121,4 +121,151 @@ Modules
    variables, those are kept hidden and private, we can think of this object return
    value as essentially public API for our module
   
+  -2 requirements for module pattern:
+    1. there must be an outer enclosing function, and it must be invoked at least
+       once (each time creates a new module instance)
+    2. the enclosing function must return back at least one inner function, so
+       that this inner function has closure over the private scope, and can access
+       and/or modify that private state
   
+  -an object with a function property on it alone isn't really a module
+  -an object which is returned from a function invocation which only has data 
+   properties on it and no closured functions isn't really a module
+  
+  -if a singleton is wanted, use IIFE
+  -modules are just functions, therefore they can receive parameters
+    E.g.
+    function CoolModule(id) {
+    	function identify() {
+    		console.log( id );
+    	}
+    	return {
+    		identify: identify
+    	};
+    }
+    var foo1 = CoolModule( "foo 1" );
+    var foo2 = CoolModule( "foo 2" );
+    foo1.identify(); // "foo 1"
+    foo2.identify(); // "foo 2"
+  
+  -a variation is to name the object you are returning as public API
+    E.g.  
+    var publicAPI = {
+      change: change,
+      identify: identify1
+    };
+
+    return publicAPI;
+      
+  -by retaining an inner reference to the public API object inside your module
+   instance, you can modify that module instance from the inside, including adding
+   and removing methods, properties, and changing their values
+   
+  Modern Modules
+    E.g.
+    var MyModules = (function Manager() {
+  	var modules = {};
+
+  	function define(name, deps, impl) {
+  		for (var i=0; i<deps.length; i++) {
+  			deps[i] = modules[deps[i]];
+  		}
+  		modules[name] = impl.apply( impl, deps );
+  	}
+
+  	function get(name) {
+  		return modules[name];
+  	}
+
+  	return {
+  		define: define,
+  		get: get
+  	};
+  })();
+  
+  MyModules.define( "bar", [], function(){
+  	function hello(who) {
+  		return "Let me introduce: " + who;
+  	}
+
+  	return {
+  		hello: hello
+  	};
+  } );
+
+  MyModules.define( "foo", ["bar"], function(bar){
+  	var hungry = "hippo";
+
+  	function awesome() {
+  		console.log( bar.hello( hungry ).toUpperCase() );
+  	}
+
+  	return {
+  		awesome: awesome
+  	};
+  } );
+
+  var bar = MyModules.get( "bar" );
+  var foo = MyModules.get( "foo" );
+
+  console.log(
+  	bar.hello( "hippo" )
+  ); // Let me introduce: hippo
+
+  foo.awesome(); // LET ME INTRODUCE: HIPPO
+  
+  Future Modules:
+    -ES6 treats a file as a separate module, each module can both import other
+     modules or specific API members, as well export their own public API members
+    -function based modules aren't a statically recognized pattern, so their API
+     semantics aren't considered until run-time. So, you can actually modify 
+     a module's API during the run-time
+    -ES6 modules are static (APIs don't change at runtime), since compiler knows
+     that, it check during (file loading and) compilation that a reference to a
+     member of an imported module's API actually exists, if not, compiler throws
+     an "early" error at compile-time
+    -ES6 modules don't have an "inline" format, they must be defined in separate
+     files
+    E.g.
+    bar.js:
+      function hello(who) {
+      	return "Let me introduce: " + who;
+      }
+
+      export hello;
+      
+    foo.js
+      // import only `hello()` from the "bar" module
+      import hello from "bar";
+
+      var hungry = "hippo";
+
+      function awesome() {
+      	console.log(
+      		hello( hungry ).toUpperCase()
+      	);
+      }
+
+      export awesome;
+      
+    // import the entire "foo" and "bar" modules
+    module foo from "foo";
+    module bar from "bar";
+
+    console.log(
+    	bar.hello( "rhino" )
+    ); // Let me introduce: rhino
+
+    foo.awesome(); // LET ME INTRODUCE: HIPPO
+    
+  -'import' imports one or more members from a module's API into the current
+   scope, each to a bound variables
+  -'module' imports an entire module API to a bound variable
+  -'export' exports an identifier (var, function) to the public API for the current
+   module
+  -content inside the module file are treated as if enclosed in a scope closure, like
+   function-closure modules
+   
+Review
+  -Closure is when a function can remember and access its lexical scope even when
+   it's invoked outside its lexical scope
