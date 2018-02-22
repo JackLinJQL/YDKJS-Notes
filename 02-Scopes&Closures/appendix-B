@@ -1,0 +1,29 @@
+Appendix B: Polyfilling Block Scope
+-pre-ES6
+  {
+    let a = 2;
+    console.log( a ); // 2
+  }
+
+  console.log( a ); // ReferenceError
+  
+-BUT:
+  try{throw 2}catch(a){
+    console.log( a ); // 2
+  }
+
+  console.log( a ); // ReferenceError
+  
+Implicit vs. Explicit Blocks:
+  E.g. Explicit Blocks
+  let (a = 2) {
+    console.log( a ); // 2
+  }
+
+  console.log( a ); // ReferenceError
+  
+  //instead of hijacking an existing block, the let-statement creates an explicit
+  block for its scope binding
+  //stands out more, far more robust in code refactoring, somewhat cleaner code
+  
+  -but it is not included in ES6, nor does Traceur 
