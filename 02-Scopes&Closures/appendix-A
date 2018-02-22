@@ -1,0 +1,11 @@
+Appendix A: Dynamic Scope
+-doesn't concern itself with how and where functions and scopes are declared, 
+ but rather where they are called from, which means that the scope chain is based
+ on the call-stack, not the nesting of scope in code
+
+-but JS doesn't not use dynamic scope
+
+-lexical scope is write-time, whereas dynamic scope (and this !) are runtime
+
+-lexical scope cares where a function was declared, but dynamic scope cares where
+ a function is called from
