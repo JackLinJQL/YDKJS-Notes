@@ -1,0 +1,161 @@
+Chapter 1: this or that?
+-'this' is a special identifier keyword that's automatically defined in the
+ scope of every function
+
+Why 'this'?
+function identify() {
+	return this.name.toUpperCase();
+}
+
+function speak() {
+	var greeting = "Hello, I'm " + identify.call( this );
+	console.log( greeting );
+}
+
+var me = {
+	name: "Kyle"
+};
+
+var you = {
+	name: "Reader"
+};
+
+identify.call( me ); // KYLE
+identify.call( you ); // READER
+
+speak.call( me ); // Hello, I'm KYLE
+speak.call( you ); // Hello, I'm READER
+
+//allows identify() and speak() to be re-used against multiple context (me and you)
+//objects rather than needing a separate version of the function for each object
+
+-instead of using 'this', one could have explicitly passed in a context object, but
+ 'this' provides a more elegant way of implicitly "passing along" an object reference
+ leading to cleaner API design and easier to re-use
+ 
+-often, the more complex a usage pattern is, passing context around as explicit
+ parameters get messier than passing around a 'this' context
+ 
+Confusions: Incorrect Assumptions
+  Itself
+    -'this' does not refer to the function itself
+    -mistake thinking that referencing the function as an object lets you store
+     state (value in properties) between function calls, possible with limited 
+     uses, but there are many other patterns for better places to store state
+     besides the function object
+  E.g.
+  function foo(num) {
+  	console.log( "foo: " + num );
+  	// keep track of how many times `foo` is called
+  	this.count++;
+  }
+
+  foo.count = 0;
+  var i;
+  for (i=0; i<10; i++) {
+  	if (i > 5) {
+  		foo( i );
+  	}
+  }
+  // foo: 6
+  // foo: 7
+  // foo: 8
+  // foo: 9
+
+  // how many times was `foo` called?
+  console.log( foo.count ); // 0 -- WTF?
+  
+  -'foo.count = 0' does add a property to the function object, but 
+  this in side the function is not in fact pointing at all to that function object,
+  so even though the property name are the same, but the root objects are different
+  -'count' actually got created as a global variable with the value 'NaN'
+  
+  -to reference a function object from inside itself, 'this' by itself will
+   typically be insufficient, generally need a reference to the function object
+   via a lexical identifier (variable) that points at it
+   
+  E.g.
+  function foo() {
+  	foo.count = 4; // `foo` refers to itself
+  }
+
+  setTimeout( function(){
+  	// anonymous function (no name), cannot
+  	// refer to itself
+  }, 10 );
+  
+  -deprecated and frowned-upon 'arguments.callee' reference inside a function
+   also points to the function object of the currently executing function
+  -if needed to access anonymous function's object from inside itself, just don't
+   use an anonymous function
+  
+  -using the foo identifier as a function object reference in each place is
+   similarly side-stepping the actual understanding of 'this' and relies on
+   the lexical scoping of variable 'foo'
+   
+  E.g.
+  function foo(num) {
+  	console.log( "foo: " + num );
+
+  	// keep track of how many times `foo` is called
+  	// Note: `this` IS actually `foo` now, based on
+  	// how `foo` is called (see below)
+  	this.count++;
+  }
+
+  foo.count = 0;
+
+  var i;
+
+  for (i=0; i<10; i++) {
+  	if (i > 5) {
+  		// using `call(..)`, we ensure the `this`
+  		// points at the function object (`foo`) itself
+  		foo.call( foo, i );
+  	}
+  }
+  // foo: 6
+  // foo: 7
+  // foo: 8
+  // foo: 9
+
+  // how many times was `foo` called?
+  console.log( foo.count ); // 4
+  
+  Its Scope
+    -'this' referring to the function's scope
+    -'this' does not in any way refer to a function's lexical scope
+    -true that internally scope is kind of like an object with properties for
+     each of the available identifiers, but it's not accessible to JS code, it's
+     an inner part of the Engine's implementation
+    E.g.
+    function foo() {
+    	var a = 2;
+    	this.bar();
+    }
+
+    function bar() {
+    	console.log( this.a );
+    }
+
+    foo(); //undefined
+    
+    //most natural way of calling var() is to omit 'this'
+    //developer here is trying to bridge between the lexical scope of foo() and
+    //bar(), so that bar() has access to variable 'a'
+    //NO SUCH BRIDGE IS POSSIBLE, one cannot use a 'this' reference to look
+    //something up in a lexical scope
+
+-"Every time you feel yourself trying to mix lexical scope look-ups with this, remind yourself: there is no bridge."
+
+What's 'this'?
+-'this' is not an author-time binding but a runtime binding, it's contextual based
+ 0n the conditions of the function's invocation
+-'this' has nothing to do with where a function is declared, but has instead everything
+ to do with the manner in which the function is called
+-when a function is invoked, an activation record, otherwise known as an execution
+ context gets created
+-it contains information about where the function was called from (the call-stack),
+ how the function was invoked, what parameters were passed, etc.
+-'this' reference is a properties of the record which will be used for the duration
+ of that function's execution
