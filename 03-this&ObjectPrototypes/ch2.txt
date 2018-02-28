@@ -85,5 +85,164 @@ Nothing But Rules:
      could say the 'obj' "owns" or "contains" the function reference at the time
      the function is called
     
+    -when there is a context object for a function reference, the implicit binding
+     rule says that it's that object which should be used for 'this' binding
+     -then 'this.a' become synonymous with 'obj.a'
     
+    -only the top/last level of an object property reference chain matters to the
+     call-site
+    E.g.
+    function foo() {
+    	console.log( this.a );
+    }
+    var obj2 = {
+    	a: 42,
+    	foo: foo
+    };
+    var obj1 = {
+    	a: 2,
+    	obj2: obj2
+    };
+
+    obj1.obj2.foo(); // 42
     
+    Implicit Lost
+      -when an implicitly bound function loses that binding, it usually falls
+       back to the default binding, either global object or undefined (strict)
+      E.g.
+      function foo() {
+      	console.log( this.a );
+      }
+      var obj = {
+      	a: 2,
+      	foo: foo
+      };
+      var bar = obj.foo; // function reference/alias!
+      var a = "oops, global"; // `a` also property on global object
+      bar(); // "oops, global"
+      
+      -'bar' appears to be a reference to obj.foo, it's really just another ref
+       to 'foo' itself, moreover, the call-site is what matters, call-site in this
+       case is 'bar()' which is plain, un-decorated call and thus the default
+       binding applies
+      
+      E.g.
+      function foo() {
+      	console.log( this.a );
+      }
+      function doFoo(fn) {
+      	// `fn` is just another reference to `foo`
+
+      	fn(); // <-- call-site!
+      }
+      var obj = {
+      	a: 2,
+      	foo: foo
+      };
+      var a = "oops, global"; // `a` also property on global object
+      doFoo( obj.foo ); // "oops, global"
+      
+      -parameter passing is just implicit assignment, therefore, same result as
+       before
+       
+      -if function you're passing callback to is built-in, there's no difference
+      E.g.
+      setTimeout( obj.foo, 100 ); // "oops, global"
+      
+      -common that callback function lose their 'this' binding, but the function
+       that gets passed to callback can intentionally change 'this' for the call
+       
+      
+  Explicit Binding:
+    -implicit binding required the mutation of the object in question to include
+     reference on itself to the function, and user property function ref to 
+     implicitly bind 'this' to the object
+    -functions have 'call(..)' and 'apply(..)' methods, where vast majority of
+     functions have access to 'call(..)' and 'apply(..)'
+    -both take, as their first parameter, an object to use for the 'this', the invoke
+     the function with that 'this' specified, hence explicit binding
+    E.g.
+    function foo() {
+      console.log( this.a );
+    }
+    var obj = {
+      a: 2
+    };
+    foo.call( obj ); // 2
+    
+    -explicit binding with 'foo.call(..)' forces foo's 'this' to be 'obj'
+    -if a primitive type is passed in (string, boolean or number), the primitive
+     values get wrapped in its object-form (new String(..)...), referred to as "boxing"
+    
+    Hard Binding:
+      E.g.
+      function foo() {
+      	console.log( this.a );
+      }
+      var obj = {
+      	a: 2
+      };
+      var bar = function() {
+      	foo.call( obj );
+      };
+      bar(); // 2
+      setTimeout( bar, 100 ); // 2
+      // `bar` hard binds `foo`'s `this` to `obj`
+      // so that it cannot be overriden
+      bar.call( window ); // 2
+      
+      E.g.: typical hard binding
+      function foo(something) { 
+      	console.log( this.a, something );
+      	return this.a + something;
+      }
+
+      var obj = {
+      	a: 2
+      };
+
+      var bar = function() {
+        //when using apply, foo automatically gets invoked
+      	return foo.apply( obj, arguments ); //apply takes in obj as 'this', arguments as an aguments list for foo
+      };
+
+      var b = bar( 3 ); // 2 3
+      console.log( b ); // 5
+      
+      E.g.
+      function foo(something) {
+      	console.log( this.a, something );
+      	return this.a + something;
+      }
+      // simple `bind` helper
+      function bind(fn, obj) {
+      	return function() {
+      		return fn.apply( obj, arguments );
+      	};
+      }
+      var obj = {
+      	a: 2
+      };
+      var bar = bind( foo, obj );
+      var b = bar( 3 ); // 2 3
+      console.log( b ); // 5
+      
+      -since hard binding is common, ES5 had added Function.prototype.bind
+      
+      E.g.
+      function foo(something) {
+      	console.log( this.a, something );
+      	return this.a + something;
+      }
+
+      var obj = {
+      	a: 2
+      };
+
+      var bar = foo.bind( obj ); //bind returns a new function with 'this' set as the context that's specified
+
+      var b = bar( 3 ); // 2 3
+      console.log( b ); // 5
+      
+      
+      
