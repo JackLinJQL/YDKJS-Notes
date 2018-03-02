@@ -244,5 +244,149 @@ Nothing But Rules:
       var b = bar( 3 ); // 2 3
       console.log( b ); // 5
       
-      
-      
+  API call "Contexts"
+    -many new built-in functions in JS provide an optional param usually called
+     "context", designed as a work-around for using bind(..)
+     
+    E.g. 
+    function foo(el) {
+      console.log( el, this.id );
+    }
+    var obj = {
+      id: "awesome"
+    };
+    // use `obj` as `this` for `foo(..)` calls
+    [1, 2, 3].forEach( foo, obj ); // 1 awesome  2 awesome  3 awesome
+    
+    -internally, these functions uses explicit binding via call(..) or apply(..)
+    
+  'new' Binding
+  -there really is *no connection* to class-oriented functionality implied by 'new'
+   usage in JS
+  -in JS, a constructor is just a function that happen to be called with the 'new'
+   operator in front of them, they're not attached to classes nor do they instantiate
+   a class, they're not even special types of functions
+   "When Number is called as part of a new expression it is a constructor: it initializes the newly created object"
+  -pretty much any function including the built-in object functions like Number(..)
+   can be called with 'new' in front of it makes that function a constructor call
+  -so, there's no such thing as "constructor functions", but rather construction calls
+   of functions
+  -when a function is invoked with 'new'
+    1. a brand new object is created (aka, constructed) out of thin air
+    2. the newly constructed object is [[Prototype]]-linked
+    3. the newly constructed object is set as the 'this' binding for that function call
+    4. unless function returns its own alternate object, the 'new'-invoked function
+       call will automatically return the newly constructed object
+    E.g.
+    function foo(a) {
+    	this.a = a;
+    }
+
+    var bar = new foo( 2 );
+    console.log( bar.a ); // 2
+    
+    -by calling foo(..) with 'new', a new object is created and it's set to 'this'
+     for the call of foo(..), so 'new' is the final way that a function call's
+     'this' can be bound
+    
+Everything In Order:
+  -default binding has the lowest priority
+  E.g.
+  function foo() {
+  	console.log( this.a );
+  }
+  var obj1 = {
+  	a: 2,
+  	foo: foo
+  };
+  var obj2 = {
+  	a: 3,
+  	foo: foo
+  };
+  obj1.foo(); // 2
+  obj2.foo(); // 3
+  obj1.foo.call( obj2 ); // 3
+  obj2.foo.call( obj1 ); // 2
+    
+  -explicit binding takes precedence over implicit binding, so ask if explicit
+   applies before implicit
+    
+  E.g.
+  function foo(something) {
+  	this.a = something;
+  }
+  var obj1 = {
+  	foo: foo
+  };
+  var obj2 = {};
+  obj1.foo( 2 );
+  console.log( obj1.a ); // 2
+  obj1.foo.call( obj2, 3 );
+  console.log( obj2.a ); // 3
+  
+  var bar = new obj1.foo( 4 );
+  console.log( obj1.a ); // 2
+  console.log( bar.a ); // 4
+    
+  -'new' binding is more precedent than implicit binding
+  -'new' and 'call'/'apply', 'new foo.call(obj1)' is not allowed
+  E.g.
+  function foo(something) {
+  	this.a = something;
+  }
+  var obj1 = {};
+  var bar = foo.bind( obj1 );
+  bar( 2 );
+  console.log( obj1.a ); // 2
+  
+  var baz = new bar( 3 );
+  console.log( obj1.a ); // 2
+  console.log( baz.a ); // 3
+  
+  -'bar' is hard bound against obj1, but new bar(3) did not change obj1.a, instead
+   the hard bound (to 'obj1') call to 'bar(..)' is able to be overriden with 'new'
+  -since 'new' used, a newly created object gets returned and assigned to 'baz'
+  
+  -'new' being able to override hard binding is useful because when creating a
+   function (that can be used with 'new' for constructing objects) that essentially
+   ignores the 'this' hard binding but which presets some or all of the function's
+   arguments
+  
+Binding Exceptions:
+  Ignored 'this':
+    -if 'null' or 'undefined' was passed as a 'this' binding parameter to 'call',
+     'apply' or 'bind', those values are effectively ignored, and default binding
+     rule applies to the invocation
+     
+    E.g.
+    function foo() {
+    	console.log( this.a );
+    }
+
+    var a = 2;
+
+    foo.call( null ); // 2
+    
+    -useful to use 'apply(..)' for spreading out arrays of values as params to a
+     function call, similarly, 'bind(..)' can curry parameters (pre-set values)
+    E.g.
+    function foo(a,b) {
+    	console.log( "a:" + a + ", b:" + b );
+    }
+
+    // spreading out array as parameters
+    foo.apply( null, [2, 3] ); // a:2, b:3
+
+    // currying with `bind(..)`
+    var bar = foo.bind( null, 2 );
+    bar( 3 ); // a:2, b:3
+    
+  -ES6 has ... spread operator which will syntactically "spread out" an array
+   as parameters without needing "apply(..)" such as "foo(...[1,2])" which amounts
+   to foo(1, 2), syntactically avoiding a 'this' binding if unnecessary, but no
+   substitute for currying
+  -slight hidden "danger" in always using 'null' when 'this' doesn't matter, if
+   making a function call (from third party) and that function doesn't make a 'this'
+   reference, the default binding rule means it might inadvertently reference the
+   'global' object ('window' in the browser)
+    
