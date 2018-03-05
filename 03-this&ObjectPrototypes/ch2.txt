@@ -261,33 +261,33 @@ Nothing But Rules:
     -internally, these functions uses explicit binding via call(..) or apply(..)
     
   'new' Binding
-  -there really is *no connection* to class-oriented functionality implied by 'new'
-   usage in JS
-  -in JS, a constructor is just a function that happen to be called with the 'new'
-   operator in front of them, they're not attached to classes nor do they instantiate
-   a class, they're not even special types of functions
-   "When Number is called as part of a new expression it is a constructor: it initializes the newly created object"
-  -pretty much any function including the built-in object functions like Number(..)
-   can be called with 'new' in front of it makes that function a constructor call
-  -so, there's no such thing as "constructor functions", but rather construction calls
-   of functions
-  -when a function is invoked with 'new'
-    1. a brand new object is created (aka, constructed) out of thin air
-    2. the newly constructed object is [[Prototype]]-linked
-    3. the newly constructed object is set as the 'this' binding for that function call
-    4. unless function returns its own alternate object, the 'new'-invoked function
-       call will automatically return the newly constructed object
-    E.g.
-    function foo(a) {
-    	this.a = a;
-    }
+    -there really is *no connection* to class-oriented functionality implied by 'new'
+     usage in JS
+    -in JS, a constructor is just a function that happen to be called with the 'new'
+     operator in front of them, they're not attached to classes nor do they instantiate
+     a class, they're not even special types of functions
+     "When Number is called as part of a new expression it is a constructor: it initializes the newly created object"
+    -pretty much any function including the built-in object functions like Number(..)
+     can be called with 'new' in front of it makes that function a constructor call
+    -so, there's no such thing as "constructor functions", but rather construction calls
+     of functions
+    -when a function is invoked with 'new'
+      1. a brand new object is created (aka, constructed) out of thin air
+      2. the newly constructed object is [[Prototype]]-linked
+      3. the newly constructed object is set as the 'this' binding for that function call
+      4. unless function returns its own alternate object, the 'new'-invoked function
+         call will automatically return the newly constructed object
+      E.g.
+      function foo(a) {
+      	this.a = a;
+      }
 
-    var bar = new foo( 2 );
-    console.log( bar.a ); // 2
-    
-    -by calling foo(..) with 'new', a new object is created and it's set to 'this'
-     for the call of foo(..), so 'new' is the final way that a function call's
-     'this' can be bound
+      var bar = new foo( 2 );
+      console.log( bar.a ); // 2
+      
+      -by calling foo(..) with 'new', a new object is created and it's set to 'this'
+       for the call of foo(..), so 'new' is the final way that a function call's
+       'this' can be bound
     
 Everything In Order:
   -default binding has the lowest priority
@@ -389,4 +389,129 @@ Binding Exceptions:
    making a function call (from third party) and that function doesn't make a 'this'
    reference, the default binding rule means it might inadvertently reference the
    'global' object ('window' in the browser)
+   
+  Safer 'this':
+    -pass a specifically set up object for 'this' which is guaranteed not to be
+     an object that can create problematic side effects
+    -pass DMZ (de-militarized zone) object for ignored 'this' binding which makes
+     sure that any hidden/unexpected usage of 'this' will be restricted to the
+     empty object, insulating 'global' object from side-effects
+    -easiest way to setup a totally empty object is 'Object.create(null)' which
+     is more empty than just {}
+    E.g.
+    function foo(a,b) {
+    	console.log( "a:" + a + ", b:" + b );
+    }
+    // our DMZ empty object
+    var ø = Object.create( null );
+    // spreading out array as parameters
+    foo.apply( ø, [2, 3] ); // a:2, b:3
+
+    // currying with `bind(..)`
+    var bar = foo.bind( ø, 2 );
+    bar( 3 ); // a:2, b:3
     
+  Indirection:
+    -when "indirect references", default binding rule applies
+    E.g.
+    function foo() {
+    	console.log( this.a );
+    }
+    var a = 2;
+    var o = { a: 3, foo: foo };
+    var p = { a: 4 };
+
+    o.foo(); // 3
+    (p.foo = o.foo)(); // 2
+    
+    -result value of the assignment expression p.foo = o.foo is a ref to just
+     the underlying function object
+    
+  Softening Binding:
+    -hard-binding reduces the flexibility of a function, preventing manual 'this'
+     override with either the implicit binding or even subsequent explicit binding
+     attempts
+    -providing a different default for binding that's not global or undefined while
+     leaving the function able to be manually 'this' bound via implicit binding or
+     explicit binding would be nice 
+    -softBind(..) wraps the specified function in logic that checks the 'this'
+     at call-time and if it's 'global' or 'undefined', uses a pre-specified
+     alternate default ('obj'), otherwise 'this' is left untouched
+    E.g.
+    function foo() {
+       console.log("name: " + this.name);
+    }
+    var obj = { name: "obj" },
+        obj2 = { name: "obj2" },
+        obj3 = { name: "obj3" };
+    var fooOBJ = foo.softBind( obj );
+
+    fooOBJ(); // name: obj
+
+    obj2.foo = foo.softBind(obj);
+    obj2.foo(); // name: obj2   <---- look!!!
+
+    fooOBJ.call( obj3 ); // name: obj3   <---- look!
+
+    setTimeout( obj2.foo, 10 ); // name: obj   <---- falls back to soft-binding
+    
+    -soft-bound version of the foo() can be manually 'this'-bound to 'obj2' or
+     'obj3', falls back to 'obj' if the default binding would otherwise apply
+  
+Lexical 'this':
+  -arrow functions do not abide by the 4 rules
+  E.g.
+  function foo() {
+  	// return an arrow function
+  	return (a) => {
+  		// `this` here is lexically adopted from `foo()`
+  		console.log( this.a );
+  	};
+  }
+
+  var obj1 = {
+  	a: 2
+  };
+
+  var obj2 = {
+  	a: 3
+  };
+
+  var bar = foo.call( obj1 );
+  bar.call( obj2 ); // 2, not 3!
+    
+  -arrow function created in foo() lexically captures whatever foo()s 'this' at
+   its call-time, since foo() was 'this' bound to 'obj1', 'bar' (a ref to the returned
+   arrow function) will also be 'this' bound to 'obj1', the lexical binding of
+   an arrow-function cannot be overriden even with 'new'
+  E.g.
+  function foo() {
+  	setTimeout(() => {
+  		// `this` here is lexically adopted from `foo()`
+  		console.log( this.a );
+  	},100);
+  }
+
+  var obj = {
+  	a: 2
+  };
+
+  foo.call( obj ); // 2
+  
+  E.g.
+  function foo() {
+  	var self = this; // lexical capture of `this`
+  	setTimeout( function(){
+  		console.log( self.a );
+  	}, 100 );
+  }
+
+  var obj = {
+  	a: 2
+  };
+
+  foo.call( obj ); // 2
+
+  -while 'self = this' and arrow functions both seem like 'good' solutions to not
+   use 'bind(..), they're essentially fleeing from 'this'
+  -don't mix the two in a same function
