@@ -1,0 +1,196 @@
+Chapter 3: Objects
+Syntax:
+  -objects come in two forms: declarative (literal) form and the constructed form
+  -literal:
+    E.g.
+    var myObj = {
+    	key: value
+    	// ...
+    };
+  -constructed:
+  E.g.
+  var myObj = new Object();
+  myObj.key = value;
+  
+  -constructed and literal form result in exactly the same sort of object, only
+   difference is that one can add one or more key/value pairs to the literal 
+   declaration whereas the declarative one can only add one-by-one
+  -extremely uncommon to use "constructed form"
+
+Type:
+  -6 primary types aka. language types
+    -string
+    -number
+    -boolean
+    -undefined
+    -null (object, but a bug)
+    -object
+  -common mis-statement that "everything in JS is an object", clearly not true
+  -complex primitives
+    -function, sub-type of object ("callable object"), "first class" in that they're
+     basically just normal objects (with callable behaviour semantics bolted on),
+     so they can be handled like an other plain object
+    -arrays are also a form of objects, with extra behaviour, the organization
+     of contents in array is slight more structured than a general object
+  
+  Built-in Objects
+    -String, Number, Boolean, Object, Function, Array, Date, RegExp, Error
+    -in JS, these are just built-in functions, each can be used as a constructor
+     with the result being a newly constructed object of the sub-type in question
+    E.g.
+    var strPrimitive = "I am a string";
+    typeof strPrimitive;							// "string"
+    strPrimitive instanceof String;					// false
+
+    var strObject = new String( "I am a string" );
+    typeof strObject; 								// "object"
+    strObject instanceof String;					// true
+
+    // inspect the object sub-type
+    Object.prototype.toString.call( strObject );	// [object String]
+    
+    -primitive value string isn't a String object, it's a primitive literal and 
+     immutable value, to perform operations on it, such as length, String object
+     is required
+    -JS automatically coerces a "string" primitive to a String object when necessary
+    -strongly preferred to use the literal form for a value, where possible instead
+     of object construction
+    -Objects, Arrays, & RegExps are all objects regardless of whether the literal
+     or constructed form is used
+    -constructed form does offer in some cases more options in creation than the
+     literal form counterpart
+    -only use constructed form if you need the extra options
+    -Error object is rarely created explicitly in code, but usually created automatically
+     when exceptions are thrown
+Contents:
+  -content of an object consists of values (any type) stored at specifically named
+   locations called properties
+  -"contents" aren't actually stored inside the objects, engine stores values in
+   implementation-dependent ways and may not store them in some object container
+  -what is stored in the containers are these property names acting as pointers
+   (references) to where the values are stored
+  -access value at the location 'a' in 'myObject' uses either '.' or '[]'
+  -'.a' syntax is usually referred to as "property" access, whereas ["a"] syntax
+   is usually referred to as "key" access
+  -main difference is that '.' operator requires an Identifier compatible property
+   name whereas [".."] take basically any UTF-8/unicode compatible string as the
+   name for the property
+  -E.g. "super-fun" needs [] since it's invalid Identifier property name
+  -in objects, property names are ALWAYS strings, if any other value types are used,
+   they will first be converted to string including numbers
+  
+  E.g.
+  var myObject = { };
+
+  myObject[true] = "foo";
+  myObject[3] = "bar";
+  myObject[myObject] = "baz";
+   
+  myObject["true"];				// "foo"
+  myObject["3"];					// "bar"
+  myObject["[object Object]"];	// "baz"
+  
+  Computed Property Names:
+    -'myObject[..]' is useful if needed to computer expression value as key name
+     like 'myObject[prefix + name]', not really helpful when declaring objects
+     using object-literal syntax
+    E.g. Computed Property Names
+    var prefix = "foo";
+    var myObject = {
+    	[prefix + "bar"]: "hello",
+    	[prefix + "baz"]: "world"
+    };
+
+    myObject["foobar"]; // hello
+    myObject["foobaz"]; // world
+  
+    Property vs. Method:
+    -in other languages, functions which belong to objects (aka, "classes") are
+     referred to as "methods", not uncommon to hear "method access" as oppose to
+     "property access"
+    -technically, functions never "belong" to object
+    -as 'this' is dynamically bound at run-time, at the call-site, thus its 
+     relationship to the object is indirect at best
+    -every time one access a property on an object, that's a property access,
+     regardless of the type of value you get back
+    E.g.
+    function foo() {
+    	console.log( "foo" );
+    }
+    var someFoo = foo;	// variable reference to `foo`
+    var myObject = {
+    	someFoo: foo
+    };
+    foo;				// function foo(){..}
+    someFoo;			// function foo(){..}
+    myObject.someFoo;	// function foo(){..}
+    
+    -'someFoo' and 'myObject.someFoo' are just two separate references to the
+     same function, so neither really makes sense to be called a method
+    -conclusion, method or function is interchangeable in JS
+    -ES6 adds a 'super' reference, typically going to be used with 'class'
+    E.g. even when one declare a function expression as part of the object-literal,
+     that function doesn't magically belong more to the object, still just multiple
+     references to the same function object
+    var myObject = {
+   	  foo: function foo() {
+   		 console.log( "foo" );
+   	  }
+    };
+    var someFoo = myObject.foo;
+    someFoo;		// function foo(){..}
+    myObject.foo;	// function foo(){..}
+    
+  Arrays:
+    -arrays assume numeric indexing, values are stored at indices at non-negative ints
+    -arrays are objects, so one can add properties onto the array
+    E.g.
+    var myArray = [ "foo", 42, "bar" ];
+    myArray.baz = "baz";
+    myArray.length;	// 3, length does not change from adding property
+    myArray.baz;	// "baz"
+    
+    -arrays can technically be used as plain key/value object, but they have
+     behaviours and optimizations that's specific to their intended use
+    -if one tries to add a property to an array, but the property looks like a number,
+     it'll end up instead as a numeric index, thus modifying the array content
+    E.g.
+    var myArray = [ "foo", 42, "bar" ];
+    myArray["3"] = "baz"; //if added to index inconsecutively, empty indices gets a null value
+    myArray.length;	// 4
+    myArray[3];		// "baz"
+    
+  Duplicating Objects:
+    E.g.
+    function anotherFunction() { /*..*/ }
+    var anotherObject = {
+    	c: true
+    };
+    var anotherArray = [];
+    var myObject = {
+    	a: 2,
+    	b: anotherObject,	// reference, not a copy!
+    	c: anotherArray,	// another reference!
+    	d: anotherFunction
+    };
+    anotherArray.push( anotherObject, myObject );
+    
+    -need to determine if a shallow or deep copy is needed
+    -a shallow copy would end up with 'a' on the new object as a copy of the
+     value '2', but 'b', 'c', and 'd' properties as just references to the same
+     place as the references of the original object
+    -a deep copy would duplicate not only 'myObject', but 'anotherObject', and
+     'anotherArray', but an issue occurs when 'anotherArray' has references to
+     'anotherObject' and 'myObject', so an infinite circular duplication problem
+     occurs due to the circular reference
+    -one subset solution is that objects which are JSON-safe (serialize to a JSON
+     string then re-parsed to an object) can easily be duplicated with:
+     var newObj = JSON.parse( JSON.stringify( someObj ) );
+    -shallow copy has less issues, so ES6 now define 'Object.assign(..)' for this,
+     it takes a target object as its first parameter, and one or more source objects
+     as subsequent parameters
+    -it iterates over the enumerable, owned keys on the source object(s) and
+     copies them
+    E.g.
+    var newObj = Object.assign({}, {a: 2}, {b:3}) //newObj = {a: 2, b: 3}
+    
