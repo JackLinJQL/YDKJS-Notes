@@ -194,3 +194,4 @@ Contents:
     E.g.
     var newObj = Object.assign({}, {a: 2}, {b:3}) //newObj = {a: 2, b: 3}
     
+  Property Descriptors:
