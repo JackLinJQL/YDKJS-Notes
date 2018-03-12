@@ -335,3 +335,16 @@ Contents:
        changed
       -highest level of immutability
       -can "deeop freeze" an object by calling freeze on all referenced objects
+      
+  [[Get]]:
+    -'myObject.a' is a property access, but it doesn't just look in 'myObject'
+     for a property of the name 'a'
+    -[[Get]] operation gets performed instead where it first inspects the object
+     for a property of the requested name, and if it find it, return the value
+     accordingly
+    -if it doesn't find a property of the requested name, it traverses through
+     the [[Prototype]] chain, if any
+    -'undefined' is returned if it cannot find the property anyhow
+    -different compared to reference variable, if reference variable not found
+     through the lexical scope, ReferenceError is returned instead
+    -cannot distinguish if undefined was the actual value or value was not found
