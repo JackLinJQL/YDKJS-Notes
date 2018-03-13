@@ -348,3 +348,13 @@ Contents:
     -different compared to reference variable, if reference variable not found
      through the lexical scope, ReferenceError is returned instead
     -cannot distinguish if undefined was the actual value or value was not found
+    
+  [[Put]]:
+  -when invoking [[put]], it behaves based on a number of factors, including
+   whether the property is already present on the object or not
+  -if property is present, algo will check:
+    1. is the property an accessor descriptor, if so, call the setter, if any
+    2. is the property a data description with writable of false, if so fail in
+       non-strict mode else TypeError in strict mode
+    3. otherwise, set the value to the existing property as normal
+  -if not yet present, [[put]] is even more nuanced and complex
