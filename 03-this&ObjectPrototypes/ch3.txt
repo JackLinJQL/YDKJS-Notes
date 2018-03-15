@@ -358,3 +358,135 @@ Contents:
        non-strict mode else TypeError in strict mode
     3. otherwise, set the value to the existing property as normal
   -if not yet present, [[put]] is even more nuanced and complex
+  
+  Getters & Setters:
+    -may be possible to override the default [[Get]] or [[Put]] operations for
+     an entire object (not just per property)
+    -getters are properties which actually call a hidden function to retrieve
+     a value, setters are properties which actually call a hidden function to set a value
+    -when defining a property to have either a getter or setter, they become
+     "accessor descriptor", the value and writable characteristics are ignored and
+     JS considers set and get characteristics of the property as well as configurable
+     and enumerable
+    E.g.
+    var myObject = {
+    	// define a getter for `a`
+    	get a() {
+    		return 2;
+    	}
+    };
+    Object.defineProperty(
+    	myObject,	// target
+    	"b",		// property name
+    	{			// descriptor
+    		// define a getter for `b`
+    		get: function(){ return this.a * 2 },
+
+    		// make sure `b` shows up as an object property
+    		enumerable: true
+    	}
+    );
+
+    myObject.a; // 2
+    myObject.b; // 4
+    
+    -in both cases, we created a property on the object that actually doesn't
+     hold a value, but who access automatically result in a hidden function call
+     to the getter function
+    
+    E.g.
+    var myObject = {
+    	// define a getter for `a`
+    	get a() {
+    		return 2;
+    	}
+    };
+    myObject.a = 3;
+    myObject.a; // 2
+    
+    -since only getter is defined for 'a', if value of a is to be set later, the
+     set operation will silently throw the assignment away since getter is hardcoded
+     to return '2'
+    -will almost certainly want to always declare both getter and setter
+    E.g.
+    var myObject = {
+    	// define a getter for `a`
+    	get a() {
+    		return this._a_;
+    	},
+
+    	// define a setter for `a`
+    	set a(val) {
+    		this._a_ = val * 2;
+    	}
+    };
+    myObject.a = 2;
+    myObject.a; // 4
+    
+    -'_a_' is purely by convention, implies nothing special about its behaviour
+    
+  Existence:
+    -check if an object has certain property without asking to get property's value
+    E.g.
+    var myObject = {
+    	a: 2
+    };
+
+    ("a" in myObject);				// true
+    ("b" in myObject);				// false
+
+    myObject.hasOwnProperty( "a" );	// true
+    myObject.hasOwnProperty( "b" );	// false
+    
+    -'in' operator check to see if the property is in the object or if it exists
+     at any higher level of the [[Prototype]] chain
+    -by contrast, 'hasOwnProperty(..)' checks to see if only 'myObject' has the
+     property or not and will not consult the [[Prototype]] chain
+    -'hasOwnProperty(..)' is accessible for all normal object via delegation to
+     Object.prototype
+    -more robust way of checking is 'Object.prototype.hasOwnProperty.call(myObject, "a")'
+     and uses explicit 'this' binding to apply it against our 'myObject'
+    -'in' only checks for the existence of a property name
+    
+  Enumeration:
+    E.g.
+    var myObject = { };
+    Object.defineProperty(
+    	myObject,
+    	"a",
+    	// make `a` enumerable, as normal
+    	{ enumerable: true, value: 2 }
+    );
+    Object.defineProperty(
+    	myObject,
+    	"b",
+    	// make `b` NON-enumerable
+    	{ enumerable: false, value: 3 }
+    );
+    myObject.b; // 3
+    ("b" in myObject); // true
+    myObject.hasOwnProperty( "b" ); // true
+    
+    for (var k in myObject) {
+    	console.log( k, myObject[k] );
+    }
+    // "a" 2
+    
+    -when for..in enumerate an array it will include not only all the numeric
+     indices, but also any enumerable properties
+    -good idea to use 'for..in' loops only on objects and traditional for loops
+     for values stored in arrays
+    
+    -'propertyIsEnumerable(..)' tests whether the given property name exists
+     directly on the object and is also enumerable:true
+    -'getOwnPropertyName' returns all the properties, enumerable or not
+    -'in' vs 'hasOwnProperty(..)' differ in whether they consult the [[Prototype]]
+     chain or not, Object.keys(..) and Object.getOwnPropertyNames(..) both inspect
+     only the direct object specified
+    
+  Iteration:
+    
+    
+    
+    
+    
