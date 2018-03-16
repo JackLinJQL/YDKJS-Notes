@@ -485,8 +485,93 @@ Contents:
      only the direct object specified
     
   Iteration:
+    -ES5 added iteration helpers for arrays, including 'forEach(..)', 'every(..)',
+     'some(..)' where each accepts a function callback to apply to each element
+     in the array
+    -forEach(..) will iterate over all values in the array and ignores any callback
+     return values
+    -every(..) keeps going until the end of the callback returns a falsy value
+    -some(..) keeps going until the end or the callback returns a truthy value
+    -every(..) and some(..) behave somewhat like a break statement inside a normal
+     for loop
+    -order of iteration over an object's properties is not guaranteed and may
+     vary between different JS engines
+    -do not rely on any observed ordering for anything that quires consistency 
+     among environments
+    -to iterate over values directly, ES6 adds for..of syntax for iterating over
+     arrays
+    -for..of asks an iterator object of the thing being iterated and the loop then
+     iterates over the successive return values from calling that iterator object's
+     next() method, once for each loop iteration
+    -Arrays have built-in @@iterator
+    E.g.
+    var myArray = [ 1, 2, 3 ];
+    var it = myArray[Symbol.iterator]();
+
+    it.next(); // { value:1, done:false }
+    it.next(); // { value:2, done:false }
+    it.next(); // { value:3, done:false }
+    it.next(); // { done:true }
     
+    -@@iterator is an internal property of an object using ES6 Symbol: Symbol.iterator,
+     @@iterator is not the iterator object, but a function that returns the
+     iterator object
+    -when next() is called, it returns { value: .., done: ..}
     
-    
-    
-    
+    -normally, regular objects do not have built-in @@iterator
+    E.g.
+    var myObject = {
+    	a: 2,
+    	b: 3
+    };
+
+    Object.defineProperty( myObject, Symbol.iterator, {
+    	enumerable: false,
+    	writable: false,
+    	configurable: true,
+    	value: function() {
+    		var o = this;
+    		var idx = 0;
+    		var ks = Object.keys( o );
+    		return {
+    			next: function() {
+    				return {
+    					value: o[ks[idx++]],
+    					done: (idx > ks.length)
+    				};
+    			}
+    		};
+    	}
+    } );
+
+    // iterate `myObject` manually
+    var it = myObject[Symbol.iterator]();
+    it.next(); // { value:2, done:false }
+    it.next(); // { value:3, done:false }
+    it.next(); // { value:undefined, done:true }
+
+    // iterate `myObject` with `for..of`
+    for (var v of myObject) {
+    	console.log( v );
+    }
+    // 2
+    // 3
+  
+  E.g.
+  var randoms = {
+  	[Symbol.iterator]: function() {
+  		return {
+  			next: function() {
+  				return { value: Math.random() };
+  			}
+  		};
+  	}
+  };
+
+  var randoms_pool = [];
+  for (var n of randoms) {
+  	randoms_pool.push( n );
+
+  	// don't proceed unbounded!
+  	if (randoms_pool.length === 100) break;
+  }
