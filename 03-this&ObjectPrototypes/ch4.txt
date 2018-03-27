@@ -1,3 +1,38 @@
 Chapter 4: Mixing (Up) "Class" Objects
   Class Theory:
-    -OO stresses that data intrinsically has associated behaviour
+    -OO stresses that data intrinsically has associated behaviour that operates
+     on it, so proper design is to package up (encapsulate) the data and the behaviour
+     together, known as data structure
+    -E.g. series of characters known as string and you usually want to do things
+     with the data, so the behaviours that can apply to that data are all designed
+     as methods of a String class
+    -any given string is just an instance of this class, meaning that it's a neatly
+     collected packaging of both the character data and the functionality we can
+     perform on it
+    -classes also imply a way of classifying a certain data structure, given structure
+     as a specific variation of a more general base definition
+    -e.g. car as a vehicle, so class Vehicle is the parent of class Car
+    -Vehicle would be all the stuff that's common to all different types of vehicles
+    -polymorphism: idea that a general behavior from a parent class can be overriden
+     in a child class to give it more specifics, relative polymorphism lets us reference
+     the base behaviour from the overriden behaviour
+
+    "Class" Design Pattern:
+      -procedural programming: describing code which only consists of procedures (functions)
+       calling other functions without any higher abstractions
+      -"functional programming", classes are just one of several common design patterns
+      -Java doesn't give you a choice but to have everything as classes, C/C++ or
+       PHP can either be procedural or class-oriented
+       
+    JavaScript "Classes":
+      -JS has some class-like syntactic elements like 'new' and 'instanceOf'
+      -but JS ***does NOT*** actually have classes
+      -since classes are design patterns, you can, with lots of effort implement
+       approximations for much of classical class functionality
+      -JS tries to satisfy the extremely pervasive desire to design with classes by
+       providing seemingly class-like syntax
+      -classes are optional pattern in software design, you have the choice to use them
+       in JS or not
+
+  Class Mechanics:
+    -
