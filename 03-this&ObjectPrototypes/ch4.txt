@@ -23,7 +23,7 @@ Chapter 4: Mixing (Up) "Class" Objects
       -"functional programming", classes are just one of several common design patterns
       -Java doesn't give you a choice but to have everything as classes, C/C++ or
        PHP can either be procedural or class-oriented
-       
+
     JavaScript "Classes":
       -JS has some class-like syntactic elements like 'new' and 'instanceOf'
       -but JS ***does NOT*** actually have classes
@@ -35,4 +35,20 @@ Chapter 4: Mixing (Up) "Class" Objects
        in JS or not
 
   Class Mechanics:
-    -
+    -Stack class itself is not a "stack", one must instantiate the Stack class before
+     you have a concrete data structure thing to operate against
+
+    Building:
+      -"class" and "instance" based thinking come from a building construction
+      -architect plan out all characteristics of a building, how wide, how tall..
+       and does not care where the building will be built or the number of copies
+      -architectural blue-prints are only plans for a building
+      -a building would then be the physical instantiation of the blue-print plans
+      -class is a blueprint that can be instantiated to create an object and an
+       object would then be an instance of a class
+      -the object is a copy of all the characteristics described by the class
+      -one does not generally use an object instance to directly access and manipulate
+       its class, but usually possible to at least determine which class an object
+       instance comes from
+      -a class is instantiated into object form by a cope operation
+    Constructor:
