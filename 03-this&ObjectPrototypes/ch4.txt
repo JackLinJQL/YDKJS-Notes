@@ -52,3 +52,21 @@ Chapter 4: Mixing (Up) "Class" Objects
        instance comes from
       -a class is instantiated into object form by a cope operation
     Constructor:
+      -initialize any information (state) the instance will need
+      -almost always called with 'new' to let the language engine know you want
+       to construct a new class instance
+
+  Polymorphism:
+    -the idea that any method can reference another method (of the same of different name)
+     at a higher level of the inheritance hierarchy
+    -relative polymorphism because we don't absolutely define which inheritance level
+     we want to access, but simply one level up
+    -traditionally, super is a direct way for the constructor of a child class
+     to reference the constructor of its parent class, in JS, it's the reverse,
+     more appropriate to think of the class belonging to the constructor
+    -inheritance is done through .prototype in JS, so there is no direct way of
+     referencing parent and child constructors
+    -definition for a method polymorphs depending on which class you are referencing
+     an instance of
+    -a child gets a copy of what it needs from the parent class instead of linking
+     to its parent class, class inheritance implies copies
