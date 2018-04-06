@@ -70,3 +70,13 @@ Chapter 4: Mixing (Up) "Class" Objects
      an instance of
     -a child gets a copy of what it needs from the parent class instead of linking
      to its parent class, class inheritance implies copies
+
+    Multiple Inheritance:
+      -Deadly diamond, child class inherits from two parent class, each provide
+       a common method with same name, which does the child use?
+
+  Mixins:
+    -JS doesn't automatically perform copy when you inherit or instantiate
+    -there're no classes in JS, only objects and they don't get copied to other
+     objects, they get linked together
+    -mixins fake the missing copy behaviour in JS
