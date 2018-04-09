@@ -80,3 +80,97 @@ Chapter 4: Mixing (Up) "Class" Objects
     -there're no classes in JS, only objects and they don't get copied to other
      objects, they get linked together
     -mixins fake the missing copy behaviour in JS
+
+    Explicit Mixins:
+      -'extend(..)' is a utility that manually copies parent class for the child
+       class, but let's call it mixin(..) here
+      E.g.
+      // vastly simplified `mixin(..)` example:
+      function mixin( sourceObj, targetObj ) {
+        for (var key in sourceObj) {
+          // only copy if not already present
+          if (!(key in targetObj)) {
+            targetObj[key] = sourceObj[key];
+          }
+        }
+        return targetObj;
+      }
+      -note, there're no classes, only objects making copies from and to
+      -functions aren't actually duplicated, but rather referenced
+      -'Vehicle.drive.call(this)' is known as "explicit pseudo-polymorphism"
+      -explicit pseudo-polymorphism should be avoided wherever possible since the
+       cost outweighs the benefit in most respects
+
+      Mixing Copies:
+        E.g.
+        // alternate mixin, less "safe" to overwrites
+        function mixin( sourceObj, targetObj ) {
+          for (var key in sourceObj) {
+            targetObj[key] = sourceObj[key];
+          }
+
+            return targetObj;
+          }
+
+          var Vehicle = {
+            // ...
+          };
+
+          // first, create an empty object with
+          // Vehicle's stuff copied in
+          var Car = mixin( Vehicle, { } );
+
+          // now copy the intended contents into Car
+          mixin( {
+            wheels: 4,
+
+            drive: function() {
+              // ...
+            }
+        }, Car );
+        -mixin: class contents mixed-in just like you mix in chocolate chips into
+         cookie dough
+        -since the two objects also share refs to their common functions, this means
+         that even manual coping of functions (mixins) from one objects to another
+         doesn't actually emulate the real duplication from class to instance that
+         occurs in class-oriented languages
+        -JS functions can't be duplicated, so what one ends up with instead is a
+         duplicated reference to the same shared function object, if the shared
+         function object is modified, but classes would be affected
+        -might as well just define the properties twice, once on each object
+        -explicitly mix-in two or more objects can emulate multiple inheritance
+
+      Parasitic Inheritance:
+        -some ways explicit and other ways implicit
+        -initially make a copy of the definition from parent class then mixin to
+         child class definition and pass off this composed object as child instance
+
+    Implicit Mixins:
+      E.g.
+      var Something = {
+        cool: function() {
+          this.greeting = "Hello World";
+          this.count = this.count ? this.count + 1 : 1;
+        }
+      };
+
+      Something.cool();
+      Something.greeting; // "Hello World"
+      Something.count; // 1
+
+      var Another = {
+        cool: function() {
+          // implicit mixin of `Something` to `Another`
+          Something.cool.call( this );
+        }
+      };
+
+      Another.cool();
+      Another.greeting; // "Hello World"
+      Another.count; // 1 (not shared state with `Something`)
+
+      -with 'Something.cool.call(this)', it borrows the function Something.cool()
+       and call it in the context of Another instead of Something, so assignment
+       that Something.cool() makes are applied against the Another object rather
+       than the Something object
+      -avoid such constructs where possible
