@@ -1,0 +1,5 @@
+Chapter 5: Prototypes:
+
+[[Prototype]]:
+  -objects in JS have an internal property denoted in the specification as [[Prototype]],
+   which is simply a reference to another object
